@@ -104,6 +104,39 @@ num_colors = [_yellow, _cyan, _green, _blue, _red, _magenta, _black]
 
 input_state = command_input
 
+def board_to_string(board: Board) -> str:
+    token_map = {
+        BoardTile.Val.ZERO: ".",
+        BoardTile.Val.ONE: _yellow + "1" + _col_end,
+        BoardTile.Val.TWO: _cyan + "2" + _col_end,
+        BoardTile.Val.THREE: _green + "3" + _col_end,
+        BoardTile.Val.FOUR:_blue + "4" + _col_end,
+        BoardTile.Val.FIVE: _red + "5" + _col_end,
+        BoardTile.Val.SIX: _magenta + "6" + _col_end,
+        BoardTile.Val.SEVEN: _magenta + "7" + _col_end,
+        BoardTile.Val.EIGHT: _magenta + "8" + _col_end,
+        BoardTile.Val.NINE: _magenta + "9" + _col_end,
+        BoardTile.Val.BOMB: _red_h + "B" + _col_end,
+    }
+
+    def get_token(tile: BoardTile):
+        if tile.is_revealed == False:
+            return "#"
+
+        token = token_map.get(tile.val)
+        if (token == None):
+            token = _red_h + "ERR" + _col_end
+        return token
+
+    str = ""
+    for yy in range(board.height):
+        for xx in range(board.width):
+            tile = board.get([xx, yy])
+            str += get_token(tile) + " "
+        str.strip()
+        str += "\n"
+    return str
+
 
 ### start ###
 while play == True:
