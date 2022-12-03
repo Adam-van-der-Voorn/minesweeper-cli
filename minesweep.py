@@ -137,29 +137,52 @@ def board_to_string(board: Board) -> str:
         str += "\n"
     return str
 
+def str_with_len(str: str, length: int):
+    if str == None:
+        str = ""
+    str = str[:length]
+    right_padding = " " * (length - len(str))
+    return str + right_padding
+
 def ui_to_string(message: str, width: int) -> str:
     BUFFER_SIZE_HORI = 4
     width = max(BUFFER_SIZE_HORI, width)
     TEXT_MAX_WIDTH = width - BUFFER_SIZE_HORI
 
     FRAME_HORI = "+-" + ("-" * TEXT_MAX_WIDTH) + "-+\n"
-
-    def frame_with_text(txt):
-        txt = txt[:TEXT_MAX_WIDTH]
-        right_padding = " " * (TEXT_MAX_WIDTH - len(txt))
-        return "| " + txt + right_padding + " |\n"
-
     str = FRAME_HORI
-    str += frame_with_text(message)
+    str += "| " + str_with_len(message, TEXT_MAX_WIDTH) + " |\n"
     str += FRAME_HORI
-    str += frame_with_text("Commands:")
-    str += frame_with_text("R: Reveal tile")
-    str += frame_with_text("F: Flag tile")       
-    str += frame_with_text("G: Grid reset")
-    str += frame_with_text("N: Mine amount")
-    str += frame_with_text("Q: Quit game")
+    str += "| " + str_with_len("Commands:", TEXT_MAX_WIDTH) + " |\n"
+    str += "| " + str_with_len("R: Reveal tile", TEXT_MAX_WIDTH) + " |\n"
+    str += "| " + str_with_len("F: Flag tile", TEXT_MAX_WIDTH) + " |\n"
+    str += "| " + str_with_len("G: Grid reset", TEXT_MAX_WIDTH) + " |\n"
+    str += "| " + str_with_len("N: Mine amount", TEXT_MAX_WIDTH) + " |\n"
+    str += "| " + str_with_len("Q: Quit game", TEXT_MAX_WIDTH) + " |\n"
     str += FRAME_HORI
     return str
+
+
+def concat_str_block(s_left: str, s_right: str, offset: int) -> str:
+    left_lines = s_left.split("\n")
+    right_lines = s_right.split("\n")
+
+    left_line_lengths = [len(i) for i in left_lines]
+    longest_left_line: int = max(left_line_lengths)
+
+    concat_str = ""
+    for i in range(max(len(right_lines), len(left_lines))):
+        if i < len(left_lines):
+            concat_str += str_with_len(left_lines[i], longest_left_line)
+        else:
+            concat_str += " " * longest_left_line
+
+        if i < len(right_lines):
+            concat_str += " " * offset
+            concat_str += right_lines[i]
+
+        concat_str += "\n"
+    return concat_str
 
 
 ### start ###
