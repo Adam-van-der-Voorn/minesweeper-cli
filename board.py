@@ -29,6 +29,7 @@ class BoardTile:
     def __init__(self, val: Val):
         self.val = val
         self.is_revealed = False
+        self.is_flagged = False
 
 
 class Board:
@@ -87,5 +88,12 @@ class Board:
 
     def reveal_tile(self, pos: list[int]):
         self.board[pos[0]][pos[1]].is_revealed = True
+
+    def flag_tile(self, pos: list[int]):
+        self.board[pos[0]][pos[1]].is_flagged = True
+
+    def unflag_tile(self, pos: list[int]):
+        self.board[pos[0]][pos[1]].is_flagged = False
+
 
 

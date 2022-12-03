@@ -1,6 +1,6 @@
 import os
 import random
-import math
+import re
 from os import system
 
 from board import Board, BoardTile
@@ -14,6 +14,7 @@ mine_amount = 15
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
+
 
 def get_min(array):  #get pos of min value from grid                      
     min_val = 9999 
@@ -38,25 +39,29 @@ def find(mine_board: Board, drawn_board, current_tile_pos): #Get adjacent zeros
     distance_board[ current_tile_pos[1] ][ current_tile_pos[0] ] = 0
     completion_board[ current_tile_pos[1] ][ current_tile_pos[0] ] = True
     drawn_board[ current_tile_pos[1] ][ current_tile_pos[0] ] = '.'
+    mine_board.reveal_tile(current_tile_pos)
     offset = [ [0,1], [1,0], [-1,0], [0,-1], [-1,-1], [1,-1], [-1,1], [1,1] ]
     z = True
     while z == True:
         for i in range(8):
             x_scan = current_tile_pos[0]+offset[i][0]
             y_scan = current_tile_pos[1]+offset[i][1]
+            scan_pos = [x_scan, y_scan]
             if y_scan >= 0 and y_scan <= 9 and x_scan >= 0 and x_scan <= 9:
                 # the scan is not out of the bounds of the board
                 if completion_board[y_scan][x_scan] == False:
                     # the tile has not been scanned alerady
-                    if drawn_board[y_scan][x_scan] != _cyan_h+'F'+_col_end:
+                    if mine_board.get(scan_pos).is_flagged == False:
                         # the scanned tile is not flagged 
                         if mine_board.get([x_scan, y_scan]).val == BoardTile.Val.ZERO:
                             # the scan picked up a tile with 0 adjacent bombs
                             distance_board[y_scan][x_scan] = distance_board[current_tile_pos[1]][current_tile_pos[0]] + 1
+                            mine_board.reveal_tile(scan_pos)
                             drawn_board[y_scan][x_scan] = '.'
                         if int(mine_board.get([x_scan, y_scan]).val) > 0:
                             # if the scan picks up a number
                             # reaveal the scanned number  on the drawn board
+                            mine_board.reveal_tile(scan_pos)
                             drawn_board[y_scan][x_scan] = num_colors[int(mine_board.get([x_scan, y_scan]).val)-1] + str(int(mine_board.get([x_scan, y_scan]).val)) + _col_end
                         completion_board[y_scan][x_scan] = True
         #once scanning is complete, the tile is marked as distance 9999
@@ -66,18 +71,6 @@ def find(mine_board: Board, drawn_board, current_tile_pos): #Get adjacent zeros
             z = False
     return drawn_board
 
-
-### game over ###
-def game_over(message, cols):
-    cls()
-    offset = math.floor((cols-10)/2)
-    for i in range(offset):
-        print(' ', end = '')
-    print('Game  Over')
-    print('')
-    print(message)
-    print('')
-    input('Enter to play again')
 
 play = True
 
@@ -120,6 +113,15 @@ def board_to_string(board: Board) -> str:
     }
 
     def get_token(tile: BoardTile):
+        if tile.is_revealed and tile.val == BoardTile.Val.BOMB:
+            token = token_map.get(tile.val)
+            if (token == None):
+                token = _red_h + "ERR" + _col_end
+            return token
+
+        if tile.is_flagged == True:
+            return _cyan_h + "F" + _col_end
+
         if tile.is_revealed == False:
             return "#"
 
@@ -128,23 +130,29 @@ def board_to_string(board: Board) -> str:
             token = _red_h + "ERR" + _col_end
         return token
 
-    str = ""
+    string = ""
     for yy in range(board.height):
         for xx in range(board.width):
             tile = board.get([xx, yy])
-            str += get_token(tile) + " "
-        str.strip()
-        str += "\n"
-    return str
+            string += get_token(tile) + " "
+        string.strip()
+        string += "\n"
+    return string
 
-def str_with_len(str: str, length: int):
-    if str == None:
-        str = ""
-    str = str[:length]
-    right_padding = " " * (length - len(str))
-    return str + right_padding
+def str_with_len(string: str, intended_length: int):
+    if string == None:
+        string = ""
+    
+    true_length = len_no_color(string)
+    if true_length > intended_length:
+        overflow = true_length - intended_length
+        string = string[:-overflow]
+        true_length = len_no_color(string)
 
-def ui_to_string(message: str, width: int) -> str:
+    right_padding = " " * (intended_length - true_length)
+    return string + right_padding
+
+def sidebar_string(message: str, width: int) -> str:
     BUFFER_SIZE_HORI = 4
     width = max(BUFFER_SIZE_HORI, width)
     TEXT_MAX_WIDTH = width - BUFFER_SIZE_HORI
@@ -162,12 +170,16 @@ def ui_to_string(message: str, width: int) -> str:
     str += FRAME_HORI
     return str
 
+def len_no_color(string: str) -> int:
+    str_no_color = re.sub(r"\x1b.*?m(?P<colored_text>.*?)\x1b\[0;0m", r"\g<colored_text>", string, flags=re.IGNORECASE)
+    return len(str_no_color)
+
 
 def concat_str_block(s_left: str, s_right: str, offset: int) -> str:
     left_lines = s_left.split("\n")
     right_lines = s_right.split("\n")
 
-    left_line_lengths = [len(i) for i in left_lines]
+    left_line_lengths = [len_no_color(i) for i in left_lines]
     longest_left_line: int = max(left_line_lengths)
 
     concat_str = ""
@@ -184,6 +196,13 @@ def concat_str_block(s_left: str, s_right: str, offset: int) -> str:
         concat_str += "\n"
     return concat_str
 
+def reveal_bombs(board: Board):
+    for xx in range(board.width):
+        for yy in range(board.height):
+            pos = [xx, yy]
+            if board.get(pos).val == BoardTile.Val.BOMB:
+                board.reveal_tile(pos)
+
 
 ### start ###
 while play == True:
@@ -197,48 +216,19 @@ while play == True:
                         
     while True:
         # draw
-        cls()
         if input_state != end_game_input:
             message = "Flags left: " + str(flags) #14 chars
+
+        cls()
+        board_string = board_to_string(board)
+        sidebar = sidebar_string(message, 18)
+        ui = concat_str_block(board_string, sidebar, 2)
+        print(ui)
         
-        print('')
-        print('      0 1 2 3 4 5 6 7 8 9   +----------------+')
-        print('                            | '+message, end = '')
-        for i in range(14 - len(message)):
-            print(' ', end = '')
-        print(' |') # 14 chars
-        for yy in range(10):
-                for xx in range(12):
-                    if xx == 0:
-                        print('   '+ str(yy), end = '  ')
-                    
-                    elif xx <= 10:
-                        print(drawn_board[yy][xx-1], end = ' ')
-                    else:
-                        if yy == 0:                          
-                            print('  +----------------+', end = '')
-                        if yy == 2:                          
-                            print('  +----------------+', end = '')
-                        if yy == 3:
-                            print('  | Commands:      |', end = '')
-                        if yy == 4:
-                            print('  | R: Reveal tile |', end = '')
-                        if yy == 5:
-                            print('  | F: Flag tile   |', end = '')       
-                        if yy == 6:                          
-                            print('  | G: Grid reset  |', end = '')
-                        if yy == 7:
-                            print('  | N: Mine amount |', end = '')
-                        if yy == 8:
-                            print('  | Q: Quit game   |', end = '')
-                        if yy == 9:
-                            print('  +----------------+', end = '')
-                        print('')                  
-        print('')
 
         # input
         if input_state == command_input:
-            com = input('   command: ')
+            com = input('command: ')
             com = com.lower()
             if com == 'g' or com == 'grid reset' or com == 'reset':
                 input_state = command_input
@@ -254,23 +244,23 @@ while play == True:
             continue
 
         elif input_state == mine_input:
-            amount = input('   Amount of mines: ')
+            amount = input('Amount of mines: ')
             mine_amount = int(amount)
             input_state = command_input
             continue
             
         elif input_state == x_input:
-            x = input('   x: ')
+            x = input('x: ')
             input_state = y_input
             continue
         
         elif input_state == y_input:
-            y = input('   y: ')
+            y = input('y: ')
             input_state = command_input
 
 
         elif input_state == confirm_input:
-            confirm = input('   Flag selected. Reveal anyway? y/n: ')
+            confirm = input('Flag selected. Reveal anyway? y/n: ')
             confirm = confirm.lower()
             input_state = command_input
             if confirm == 'y' or confirm == 'yes':
@@ -279,7 +269,7 @@ while play == True:
             else:
                 continue
         elif input_state == end_game_input:
-            input('   ')
+            input()
             input_state = command_input
             break
                 
@@ -291,10 +281,7 @@ while play == True:
             if drawn_board[ int(pos[1]) ][ int(pos[0]) ] != _cyan_h+'F'+_col_end or go_ahead == True: #if tile not a flag
                 go_ahead = False
                 if tile.val == BoardTile.Val.BOMB:
-                    for yy in range(10):
-                        for xx in range(10):
-                            if board.get([xx, yy]).val == BoardTile.Val.BOMB:
-                                drawn_board[yy][xx] = _red_h+'B'+_col_end
+                    reveal_bombs(board)
                     message = 'Game Over :('
                     input_state = end_game_input
                         
@@ -303,6 +290,7 @@ while play == True:
                     
                 else:
                     drawn_board[ int(pos[1]) ][ int(pos[0]) ] = num_colors[int(tile.val)-1]+str(int(tile.val))+_col_end
+                    board.reveal_tile(pos)
             else:
                 input_state = confirm_input
                 go_ahead = False
@@ -310,9 +298,11 @@ while play == True:
         if com == 'f' or com == 'flag':
             if drawn_board[ pos[1] ][ pos[0] ] == '#':
                 drawn_board[ pos[1] ][ pos[0] ] = _cyan_h+'F'+_col_end
+                board.flag_tile(pos)
                 flags -= 1
             else:
                 drawn_board[ pos[1] ][ pos[0] ] = '#'
+                board.unflag_tile(pos)
                 flags += 1
         if flags == 0:
             win_condition = mine_amount
