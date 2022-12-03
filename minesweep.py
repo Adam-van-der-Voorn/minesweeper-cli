@@ -137,6 +137,30 @@ def board_to_string(board: Board) -> str:
         str += "\n"
     return str
 
+def ui_to_string(message: str, width: int) -> str:
+    BUFFER_SIZE_HORI = 4
+    width = max(BUFFER_SIZE_HORI, width)
+    TEXT_MAX_WIDTH = width - BUFFER_SIZE_HORI
+
+    FRAME_HORI = "+-" + ("-" * TEXT_MAX_WIDTH) + "-+\n"
+
+    def frame_with_text(txt):
+        txt = txt[:TEXT_MAX_WIDTH]
+        right_padding = " " * (TEXT_MAX_WIDTH - len(txt))
+        return "| " + txt + right_padding + " |\n"
+
+    str = FRAME_HORI
+    str += frame_with_text(message)
+    str += FRAME_HORI
+    str += frame_with_text("Commands:")
+    str += frame_with_text("R: Reveal tile")
+    str += frame_with_text("F: Flag tile")       
+    str += frame_with_text("G: Grid reset")
+    str += frame_with_text("N: Mine amount")
+    str += frame_with_text("Q: Quit game")
+    str += FRAME_HORI
+    return str
+
 
 ### start ###
 while play == True:
