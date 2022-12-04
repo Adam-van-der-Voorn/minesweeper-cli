@@ -26,7 +26,7 @@ def get_min(array):  #get pos of min value from grid
                 min_val = array[yy][xx]
     return min_val_pos
 
-def find(mine_board: Board, drawn_board, current_tile_pos): #Get adjacent zeros
+def reveal(mine_board: Board, tile_pos: list[int]): #Get adjacent zeros
     distance_board = []
     completion_board = []
     
@@ -36,16 +36,15 @@ def find(mine_board: Board, drawn_board, current_tile_pos): #Get adjacent zeros
         for xx in range(10):
             distance_board[yy].append(9999)
             completion_board[yy].append(False)
-    distance_board[ current_tile_pos[1] ][ current_tile_pos[0] ] = 0
-    completion_board[ current_tile_pos[1] ][ current_tile_pos[0] ] = True
-    drawn_board[ current_tile_pos[1] ][ current_tile_pos[0] ] = '.'
-    mine_board.reveal_tile(current_tile_pos)
+    distance_board[ tile_pos[1] ][ tile_pos[0] ] = 0
+    completion_board[ tile_pos[1] ][ tile_pos[0] ] = True
+    mine_board.reveal_tile(tile_pos)
     offset = [ [0,1], [1,0], [-1,0], [0,-1], [-1,-1], [1,-1], [-1,1], [1,1] ]
     z = True
     while z == True:
         for i in range(8):
-            x_scan = current_tile_pos[0]+offset[i][0]
-            y_scan = current_tile_pos[1]+offset[i][1]
+            x_scan = tile_pos[0]+offset[i][0]
+            y_scan = tile_pos[1]+offset[i][1]
             scan_pos = [x_scan, y_scan]
             if y_scan >= 0 and y_scan <= 9 and x_scan >= 0 and x_scan <= 9:
                 # the scan is not out of the bounds of the board
@@ -55,21 +54,18 @@ def find(mine_board: Board, drawn_board, current_tile_pos): #Get adjacent zeros
                         # the scanned tile is not flagged 
                         if mine_board.get([x_scan, y_scan]).val == BoardTile.Val.ZERO:
                             # the scan picked up a tile with 0 adjacent bombs
-                            distance_board[y_scan][x_scan] = distance_board[current_tile_pos[1]][current_tile_pos[0]] + 1
+                            distance_board[y_scan][x_scan] = distance_board[tile_pos[1]][tile_pos[0]] + 1
                             mine_board.reveal_tile(scan_pos)
-                            drawn_board[y_scan][x_scan] = '.'
                         if int(mine_board.get([x_scan, y_scan]).val) > 0:
                             # if the scan picks up a number
                             # reaveal the scanned number  on the drawn board
                             mine_board.reveal_tile(scan_pos)
-                            drawn_board[y_scan][x_scan] = num_colors[int(mine_board.get([x_scan, y_scan]).val)-1] + str(int(mine_board.get([x_scan, y_scan]).val)) + _col_end
                         completion_board[y_scan][x_scan] = True
         #once scanning is complete, the tile is marked as distance 9999
-        distance_board[ current_tile_pos[1] ][ current_tile_pos[0] ] = 9999
-        current_tile_pos = get_min(distance_board)
-        if current_tile_pos == []:
+        distance_board[ tile_pos[1] ][ tile_pos[0] ] = 9999
+        tile_pos = get_min(distance_board)
+        if tile_pos == []:
             z = False
-    return drawn_board
 
 
 play = True
@@ -208,17 +204,10 @@ def reveal_bombs(board: Board):
 while play == True:
     flags = mine_amount
     board = Board(10, 10, mine_amount)
-    drawn_board = []
-    for yy in range(10):
-        drawn_board.append([])
-        for xx in range(10):
-            drawn_board[yy].append('#')
-                        
+    message = "Flags left: " + str(flags)
+
     while True:
         # draw
-        if input_state != end_game_input:
-            message = "Flags left: " + str(flags) #14 chars
-
         cls()
         board_string = board_to_string(board)
         sidebar = sidebar_string(message, 18)
@@ -278,7 +267,7 @@ while play == True:
         pos[1] = int(y)
         tile = board.get(pos)
         if com == 'x' or com == 'r' or com == 'reveal':
-            if drawn_board[ int(pos[1]) ][ int(pos[0]) ] != _cyan_h+'F'+_col_end or go_ahead == True: #if tile not a flag
+            if board.get(pos).is_flagged == False:
                 go_ahead = False
                 if tile.val == BoardTile.Val.BOMB:
                     reveal_bombs(board)
@@ -286,29 +275,26 @@ while play == True:
                     input_state = end_game_input
                         
                 elif tile.val == BoardTile.Val.ZERO:
-                    drawn_board = find(board, drawn_board, pos)
+                    reveal(board, pos)
                     
                 else:
-                    drawn_board[ int(pos[1]) ][ int(pos[0]) ] = num_colors[int(tile.val)-1]+str(int(tile.val))+_col_end
                     board.reveal_tile(pos)
             else:
                 input_state = confirm_input
                 go_ahead = False
                 
         if com == 'f' or com == 'flag':
-            if drawn_board[ pos[1] ][ pos[0] ] == '#':
-                drawn_board[ pos[1] ][ pos[0] ] = _cyan_h+'F'+_col_end
+            if board.get(pos).is_revealed == False:
                 board.flag_tile(pos)
                 flags -= 1
             else:
-                drawn_board[ pos[1] ][ pos[0] ] = '#'
                 board.unflag_tile(pos)
                 flags += 1
         if flags == 0:
             win_condition = mine_amount
             for yy in range(10):
                 for xx in range(10):
-                    if drawn_board[yy][xx] == _cyan_h+'F'+_col_end:
+                    if board.get([xx, yy]).is_flagged:
                         if board.get([xx, yy]).val == BoardTile.Val.BOMB:
                             win_condition -= 1
             if win_condition == 0:
