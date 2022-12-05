@@ -12,7 +12,7 @@ _red_h = '\033[1;41m'
 _cyan_h = '\033[1;46m'
 _col_end = '\033[0;0m'
 
-def board_to_string(board: Board) -> str:
+def board_to_string(board: Board, cursor_pos: list[int]) -> str:
     token_map = {
         BoardTile.Val.ZERO: ".",
         BoardTile.Val.ONE: _yellow + "1" + _col_end,
@@ -48,8 +48,11 @@ def board_to_string(board: Board) -> str:
     string = ""
     for yy in range(board.height):
         for xx in range(board.width):
-            tile = board.get([xx, yy])
-            string += get_token(tile) + " "
+            if [xx, yy] == cursor_pos:
+                string += "0 "
+            else:
+                tile = board.get([xx, yy])
+                string += get_token(tile) + " "
         string.strip()
         string += "\n"
     return string
