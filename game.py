@@ -2,9 +2,9 @@ from board import Board, BoardTile
 
 
 class Game:
-    def __init__(self, mine_amount):
+    def __init__(self, board_width, board_height, mine_amount):
         self.flags = mine_amount
-        self.board = Board(10, 10, mine_amount)
+        self.board = Board(board_width, board_height, mine_amount)
         self.mine_amount = mine_amount
         self.message = "Flags left: " + str(self.flags)
         self.cursor_pos = [0,0]
@@ -59,7 +59,7 @@ class Game:
                 if tile.val != BoardTile.Val.BOMB and tile.is_flagged == False and tile.is_revealed == False:
                     return
         self.end_game('You Won :)')
-        
+
 
     def end_game(self, new_message: str):
         self.message = new_message
