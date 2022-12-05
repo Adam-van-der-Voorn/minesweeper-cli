@@ -20,7 +20,7 @@ def colored_text(text: str, color: Color, highlight: bool = False) -> str:
     return "\033[1;" + str(color_num) + "m" + text + col_end
 
 
-def board_to_string(board: Board, cursor_pos: list[int]) -> str:
+def board_to_string(board: Board, cursor_pos: list[int] | None) -> str:
     token_map = {
         BoardTile.Val.ZERO: ".",
         BoardTile.Val.ONE: colored_text("1", Color.YELLOW),

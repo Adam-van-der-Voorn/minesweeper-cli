@@ -5,11 +5,15 @@ class Game:
     def __init__(self, mine_amount):
         self.flags = mine_amount
         self.board = Board(10, 10, mine_amount)
+        self.mine_amount = mine_amount
         self.message = "Flags left: " + str(self.flags)
         self.cursor_pos = [0,0]
 
 
     def move_cursor(self, offset: list[int]):
+        if self.cursor_pos == None:
+            return
+            
         new_pos = [self.cursor_pos[0] + offset[0], self.cursor_pos[1] + offset[1]]
 
         def loop_val(val: int, limit: int) -> int:
@@ -31,8 +35,7 @@ class Game:
             return
 
         if tile.val == BoardTile.Val.BOMB:
-            self.reveal_bombs()
-            self.message = 'Game Over :('
+            self.end_game('Game Over :(')
             return
             
         self.reveal(pos)
@@ -49,6 +52,21 @@ class Game:
                 self.flags -= 1
 
 
+    def check_winner(self):
+        for yy in range(self.board.height):
+            for xx in range(self.board.width):
+                tile = self.board.get([xx, yy])
+                if tile.val != BoardTile.Val.BOMB and tile.is_flagged == False and tile.is_revealed == False:
+                    return
+        self.end_game('You Won :)')
+        
+
+    def end_game(self, new_message: str):
+        self.message = new_message
+        self.cursor_pos = None
+        self.reveal_bombs()
+
+
     def reveal_bombs(self):
         for xx in range(self.board.width):
             for yy in range(self.board.height):
@@ -56,8 +74,11 @@ class Game:
                 if self.board.get(pos).val == BoardTile.Val.BOMB:
                     self.board.reveal_tile(pos)
 
+
     def reveal(self, tile_pos: list[int]):
         self.reveal_rec(tile_pos, [])
+        self.check_winner()
+
 
     def reveal_rec(self, tile_pos: list[int], searched: list[list[int]]):
         searched.append(tile_pos)
