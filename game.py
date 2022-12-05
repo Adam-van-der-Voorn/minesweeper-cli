@@ -9,9 +9,20 @@ class Game:
         self.cursor_pos = [0,0]
 
 
-    def set_cursor(self, new_pos: list[int]):
-        if self.board.is_in_bounds(new_pos):
-            self.cursor_pos = new_pos
+    def move_cursor(self, offset: list[int]):
+        new_pos = [self.cursor_pos[0] + offset[0], self.cursor_pos[1] + offset[1]]
+
+        def loop_val(val: int, limit: int) -> int:
+            if val < 0:
+                return limit + val
+            if val >= limit:
+                return val % limit
+            return val
+
+        new_pos[0] = loop_val(new_pos[0], self.board.width)
+        new_pos[1] = loop_val(new_pos[1], self.board.width)
+
+        self.cursor_pos = new_pos
 
 
     def reveal_tile(self, pos: list[int]):

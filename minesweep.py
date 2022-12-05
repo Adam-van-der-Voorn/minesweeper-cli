@@ -1,8 +1,8 @@
 # TODO
-# cursor:
-## make it loop around
 # implement bomb amounts
 # fix bug where there are not enough bombs 
+# proper game over state 
+# smilies like the o.g
 
 
 from readchar import readkey, key
@@ -34,13 +34,13 @@ while True:
         try:    
             input_char = readkey()
             if input_char == key.UP:
-                game.set_cursor([game.cursor_pos[0], game.cursor_pos[1] - 1])
+                game.move_cursor([0, -1])
             if input_char == key.DOWN:
-                game.set_cursor([game.cursor_pos[0], game.cursor_pos[1] + 1])
+                game.move_cursor([0, 1])
             if input_char == key.LEFT:
-                game.set_cursor([game.cursor_pos[0] - 1, game.cursor_pos[1]])
+                game.move_cursor([-1, 0])
             if input_char == key.RIGHT:
-                game.set_cursor([game.cursor_pos[0] + 1, game.cursor_pos[1]])
+                game.move_cursor([1, 0])
             if input_char.lower() == "r":
                 game.reveal_tile(game.cursor_pos)
             if input_char.lower() == "f":
