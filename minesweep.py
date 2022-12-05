@@ -2,11 +2,8 @@
 # cursor:
 ## make it loop around
 # implement bomb amounts
-# try to prevent flickering... dont wanna just buffer terminal though. Maybe raw mode??
 # fix bug where there are not enough bombs 
 
-
-import os
 
 from readchar import readkey, key
 
@@ -15,47 +12,49 @@ from draw import *
 from game import Game
 
 
-def cls():
-    os.system('cls' if os.name=='nt' else 'clear')
+def move_terminal_cursor_up(lines: int) -> str:
+    return "\033[" + str(lines) + "A"
 
 
 mine_amount = 15
-
+print("\n" * 11)
 ### start ###
 while True:
 
     game = Game(mine_amount)
 
     while True:
-        # draw
-        cls()
+        # draw        
         board_string = board_to_string(game.board, game.cursor_pos)
         sidebar = sidebar_string(game.message, 18)
         ui = concat_str_block(board_string, sidebar, 2)
-        print(ui, end='')
+        print(move_terminal_cursor_up(11) + ui, end='')
 
         # input
-        input_char = readkey()
-        if input_char == key.UP:
-            game.set_cursor([game.cursor_pos[0], game.cursor_pos[1] - 1])
-        if input_char == key.DOWN:
-            game.set_cursor([game.cursor_pos[0], game.cursor_pos[1] + 1])
-        if input_char == key.LEFT:
-            game.set_cursor([game.cursor_pos[0] - 1, game.cursor_pos[1]])
-        if input_char == key.RIGHT:
-            game.set_cursor([game.cursor_pos[0] + 1, game.cursor_pos[1]])
-        if input_char.lower() == "r":
-            game.reveal_tile(game.cursor_pos)
-        if input_char.lower() == "f":
-            game.try_toggle_tile_flag(game.cursor_pos)
-            game.message = "Flags left: " + str(game.flags)
-        if input_char.lower() == "g":
-            break
-        if input_char.lower() == "n":
-            raise RuntimeError("mine amount not implemented")
-        if input_char.lower() == "q":
+        try:    
+            input_char = readkey()
+            if input_char == key.UP:
+                game.set_cursor([game.cursor_pos[0], game.cursor_pos[1] - 1])
+            if input_char == key.DOWN:
+                game.set_cursor([game.cursor_pos[0], game.cursor_pos[1] + 1])
+            if input_char == key.LEFT:
+                game.set_cursor([game.cursor_pos[0] - 1, game.cursor_pos[1]])
+            if input_char == key.RIGHT:
+                game.set_cursor([game.cursor_pos[0] + 1, game.cursor_pos[1]])
+            if input_char.lower() == "r":
+                game.reveal_tile(game.cursor_pos)
+            if input_char.lower() == "f":
+                game.try_toggle_tile_flag(game.cursor_pos)
+                game.message = "Flags left: " + str(game.flags)
+            if input_char.lower() == "g":
+                break
+            if input_char.lower() == "n":
+                raise RuntimeError("mine amount not implemented")
+            if input_char.lower() == "q":
+                exit()
+        except KeyboardInterrupt:
             exit()
-                
+
         # check for winner
         if game.flags == 0:
             win_condition = mine_amount
