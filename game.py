@@ -43,7 +43,8 @@ class Game:
             self.board.unflag_tile(pos)
             self.flags += 1
         else:
-            if self.flags > 0:
+            is_tile_not_revealed = self.board.get(pos).is_revealed == False
+            if self.flags > 0 and is_tile_not_revealed:
                 self.board.flag_tile(pos)
                 self.flags -= 1
 
@@ -56,7 +57,7 @@ class Game:
                     self.board.reveal_tile(pos)
 
 
-    def reveal(self, tile_pos: list[int]): #Get adjacent zeros
+    def reveal(self, tile_pos: list[int]):
         distance_board = []
         completion_board = []
         

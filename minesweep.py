@@ -1,6 +1,4 @@
 # TODO
-# flags should not be places onto empty tiles
-# is a tile is revealed remove flags
 # cursor:
 ## Green # when on unrevealed
 ## green background F when on flag
