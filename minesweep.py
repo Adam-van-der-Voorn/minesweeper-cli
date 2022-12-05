@@ -1,5 +1,4 @@
 # TODO
-# fix bug where there are not enough bombs 
 # smilies like the o.g
 
 

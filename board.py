@@ -45,13 +45,13 @@ class Board:
                 self.board[yy].append(BoardTile(BoardTile.Val.ZERO))
         
         # place the mines
+        possibilities = [*range(self.width * self.height)]
+        random.shuffle(possibilities)
         for _ in range(num_mines):
-            xx = random.randint(0, width - 1)
-            yy = random.randint(0, height - 1)
-            while self.board[yy][xx].val == BoardTile.Val.BOMB:
-                xx = random.randint(0, width - 1)
-                yy = random.randint(0, height - 1)  
-            self.reset_tile([xx, yy], BoardTile.Val.BOMB)
+            possibility = possibilities.pop()
+            pos_x = possibility % self.width
+            pos_y = possibility // self.width
+            self.reset_tile([pos_x, pos_y], BoardTile.Val.BOMB)
 
         # set up the numbers on the board
         for yy in range(height):
