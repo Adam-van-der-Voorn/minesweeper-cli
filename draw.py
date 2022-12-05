@@ -1,57 +1,77 @@
+from enum import Enum
 import re
 from board import Board, BoardTile
 
-_yellow = '\033[1;33m'
-_cyan = '\033[1;36m'
-_green = '\033[1;32m'
-_blue = '\033[1;34m'
-_red = '\033[1;31m'
-_magenta = '\033[1;35m'
-_black = '\033[1;30m'
-_red_h = '\033[1;41m'
-_cyan_h = '\033[1;46m'
-_col_end = '\033[0;0m'
+class Color(Enum):
+    GRAY = 30
+    RED = 31
+    GREEN = 32
+    YELLOW = 33
+    BLUE = 34
+    MAGENTA = 35
+    CYAN = 36
+
+
+def colored_text(text: str, color: Color, highlight: bool = False) -> str:
+    col_end = '\033[0;0m'
+    color_num = color.value
+    if (highlight):
+        color_num += 10
+    return "\033[1;" + str(color_num) + "m" + text + col_end
+
 
 def board_to_string(board: Board, cursor_pos: list[int]) -> str:
     token_map = {
         BoardTile.Val.ZERO: ".",
-        BoardTile.Val.ONE: _yellow + "1" + _col_end,
-        BoardTile.Val.TWO: _cyan + "2" + _col_end,
-        BoardTile.Val.THREE: _green + "3" + _col_end,
-        BoardTile.Val.FOUR:_blue + "4" + _col_end,
-        BoardTile.Val.FIVE: _red + "5" + _col_end,
-        BoardTile.Val.SIX: _magenta + "6" + _col_end,
-        BoardTile.Val.SEVEN: _magenta + "7" + _col_end,
-        BoardTile.Val.EIGHT: _magenta + "8" + _col_end,
-        BoardTile.Val.NINE: _magenta + "9" + _col_end,
-        BoardTile.Val.BOMB: _red_h + "B" + _col_end,
+        BoardTile.Val.ONE: colored_text("1", Color.YELLOW),
+        BoardTile.Val.TWO: colored_text("2", Color.CYAN),
+        BoardTile.Val.THREE: colored_text("3", Color.GREEN),
+        BoardTile.Val.FOUR:colored_text("4", Color.BLUE),
+        BoardTile.Val.FIVE: colored_text("5", Color.RED),
+        BoardTile.Val.SIX: colored_text("6", Color.MAGENTA),
+        BoardTile.Val.SEVEN: colored_text("7", Color.MAGENTA),
+        BoardTile.Val.EIGHT: colored_text("8", Color.MAGENTA),
+        BoardTile.Val.NINE: colored_text("9", Color.MAGENTA),
+        BoardTile.Val.BOMB: colored_text("B", Color.RED, True),
     }
+
+    def get_token_from_map(val: BoardTile.Val):
+        token = token_map[val]
+        if (token == None):
+            token = colored_text("ERR", Color.RED, True)
+        return token
+
+    def get_cursor_token(tile: BoardTile):
+        if tile.is_flagged:
+            return colored_text("F", Color.RED, True)
+
+        if tile.is_revealed == False:
+            return colored_text("#", Color.RED, True)
+
+        if tile.val == BoardTile.Val.ZERO:
+            return colored_text(".", Color.RED, True)
+
+        return colored_text(str(tile.val.value), Color.RED, True)
 
     def get_token(tile: BoardTile):
         if tile.is_revealed and tile.val == BoardTile.Val.BOMB:
-            token = token_map.get(tile.val)
-            if (token == None):
-                token = _red_h + "ERR" + _col_end
-            return token
+            return get_token_from_map(tile.val)
 
         if tile.is_flagged == True:
-            return _cyan_h + "F" + _col_end
+            return colored_text("F", Color.MAGENTA, False)
 
         if tile.is_revealed == False:
             return "#"
 
-        token = token_map.get(tile.val)
-        if (token == None):
-            token = _red_h + "ERR" + _col_end
-        return token
+        return get_token_from_map(tile.val)
 
     string = ""
     for yy in range(board.height):
         for xx in range(board.width):
+            tile = board.get([xx, yy])
             if [xx, yy] == cursor_pos:
-                string += "0 "
+                string += get_cursor_token(tile) + " "
             else:
-                tile = board.get([xx, yy])
                 string += get_token(tile) + " "
         string.strip()
         string += "\n"

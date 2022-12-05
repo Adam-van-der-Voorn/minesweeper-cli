@@ -1,12 +1,10 @@
 # TODO
 # cursor:
-## Green # when on unrevealed
-## green background F when on flag
-## red X when on revealed tile
 ## make it loop around
 # implement bomb amounts
-# change flag color to red?
 # try to prevent flickering... dont wanna just buffer terminal though. Maybe raw mode??
+# fix bug where multiple numbers are revealed when the tile being revealed in not zero-value
+# fix bug where there are not enough bombs 
 
 
 import os
