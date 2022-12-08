@@ -79,9 +79,9 @@ while True:
                 if input_char.lower() == "f":
                     game.try_toggle_tile_flag(game.cursor_pos)
                     game.message = "Flags left: " + str(game.flags)
-            if input_char.lower() == "g":
+            if input_char.lower() == "x":
                 break
-            if input_char.lower() == "n":
+            if input_char.lower() == "m":
                 new_mine_amount = input_int("Set mine amount (next round): ", 2)
                 if new_mine_amount != None:
                     mine_amount = new_mine_amount

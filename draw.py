@@ -104,8 +104,8 @@ def sidebar_string(message: str, width: int) -> str:
     str += "| " + str_with_len("Commands:", TEXT_MAX_WIDTH) + " |\n"
     str += "| " + str_with_len("R: Reveal tile", TEXT_MAX_WIDTH) + " |\n"
     str += "| " + str_with_len("F: Flag tile", TEXT_MAX_WIDTH) + " |\n"
-    str += "| " + str_with_len("G: Grid reset", TEXT_MAX_WIDTH) + " |\n"
-    str += "| " + str_with_len("N: Mine amount", TEXT_MAX_WIDTH) + " |\n"
+    str += "| " + str_with_len("X: Restart", TEXT_MAX_WIDTH) + " |\n"
+    str += "| " + str_with_len("M: Mine amount", TEXT_MAX_WIDTH) + " |\n"
     str += "| " + str_with_len("Q: Quit game", TEXT_MAX_WIDTH) + " |\n"
     str += FRAME_HORI
     return str
