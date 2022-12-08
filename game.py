@@ -6,7 +6,7 @@ class Game:
         self.flags = mine_amount
         self.board = Board(board_width, board_height, mine_amount)
         self.mine_amount = mine_amount
-        self.message = "Flags left: " + str(self.flags)
+        self.emote = ":)"
         self.cursor_pos = [0,0]
 
 
@@ -35,7 +35,7 @@ class Game:
             return
 
         if tile.val == BoardTile.Val.BOMB:
-            self.end_game('Game Over :(')
+            self.end_game('X(')
             return
             
         self.reveal(pos)
@@ -58,11 +58,11 @@ class Game:
                 tile = self.board.get([xx, yy])
                 if tile.val != BoardTile.Val.BOMB and tile.is_flagged == False and tile.is_revealed == False:
                     return
-        self.end_game('You Won :)')
+        self.end_game("B)")
 
 
-    def end_game(self, new_message: str):
-        self.message = new_message
+    def end_game(self, new_emote: str):
+        self.emote = new_emote
         self.cursor_pos = None
         self.reveal_bombs()
 

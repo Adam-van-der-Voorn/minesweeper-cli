@@ -1,7 +1,3 @@
-# TODO
-# smilies like the o.g
-
-
 from readchar import readkey, key
 from draw import *
 from game import Game
@@ -58,7 +54,7 @@ while True:
     while True:
         # draw
         board_string = board_to_string(game.board, game.cursor_pos)
-        sidebar = sidebar_string(game.message, 18)
+        sidebar = sidebar_string(game.emote, game.flags, 18)
         ui = concat_str_block(board_string, sidebar, 2)
         print(move_terminal_cursor_up(draw_height) + ui, end='')
 
@@ -78,7 +74,6 @@ while True:
                     game.reveal_tile(game.cursor_pos)
                 if input_char.lower() == "f":
                     game.try_toggle_tile_flag(game.cursor_pos)
-                    game.message = "Flags left: " + str(game.flags)
             if input_char.lower() == "x":
                 break
             if input_char.lower() == "m":

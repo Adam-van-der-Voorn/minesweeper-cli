@@ -92,23 +92,25 @@ def str_with_len(string: str, intended_length: int):
     return string + right_padding
 
 
-def sidebar_string(message: str, width: int) -> str:
+def sidebar_string(emote: str, num_flags: int, width: int) -> str:
     BUFFER_SIZE_HORI = 4
     width = max(BUFFER_SIZE_HORI, width)
     TEXT_MAX_WIDTH = width - BUFFER_SIZE_HORI
-
+    emote = colored_text(emote, Color.YELLOW)
+    flags_count = colored_text("Flags", Color.BLUE, False) + ": " + str(num_flags)
+    action_bar = flags_count + (" " * (TEXT_MAX_WIDTH - 2 - len_no_color(flags_count))) + emote
     FRAME_HORI = "+-" + ("-" * TEXT_MAX_WIDTH) + "-+\n"
-    str = FRAME_HORI
-    str += "| " + str_with_len(message, TEXT_MAX_WIDTH) + " |\n"
-    str += FRAME_HORI
-    str += "| " + str_with_len("Commands:", TEXT_MAX_WIDTH) + " |\n"
-    str += "| " + str_with_len("R: Reveal tile", TEXT_MAX_WIDTH) + " |\n"
-    str += "| " + str_with_len("F: Flag tile", TEXT_MAX_WIDTH) + " |\n"
-    str += "| " + str_with_len("X: Restart", TEXT_MAX_WIDTH) + " |\n"
-    str += "| " + str_with_len("M: Mine amount", TEXT_MAX_WIDTH) + " |\n"
-    str += "| " + str_with_len("Q: Quit game", TEXT_MAX_WIDTH) + " |\n"
-    str += FRAME_HORI
-    return str
+    sidebar = FRAME_HORI
+    sidebar += "| " + str_with_len(action_bar, TEXT_MAX_WIDTH) + " |\n"
+    sidebar += FRAME_HORI
+    sidebar += "| " + str_with_len("Commands:", TEXT_MAX_WIDTH) + " |\n"
+    sidebar += "| " + str_with_len("R: Reveal tile", TEXT_MAX_WIDTH) + " |\n"
+    sidebar += "| " + str_with_len("F: Flag tile", TEXT_MAX_WIDTH) + " |\n"
+    sidebar += "| " + str_with_len("X: Restart", TEXT_MAX_WIDTH) + " |\n"
+    sidebar += "| " + str_with_len("M: Mine amount", TEXT_MAX_WIDTH) + " |\n"
+    sidebar += "| " + str_with_len("Q: Quit game", TEXT_MAX_WIDTH) + " |\n"
+    sidebar += FRAME_HORI
+    return sidebar
 
 
 def len_no_color(string: str) -> int:
